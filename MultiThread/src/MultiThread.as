@@ -58,9 +58,9 @@ package
 //			this._gameContainer.mouseEnabled = false;
 //			this._gameContainer.mouseChildren = false;
 			
-			this.stage.addEventListener(Event.RESIZE,onResize);
-			
 			_game = new Game(this,onGameStart);
+			
+			this.stage.addEventListener(Event.RESIZE,onResize);
 			
 			creatteUI();
 			
@@ -108,7 +108,7 @@ package
 		private var tex3:TextField;
 		private var tex4:TextField;
 		private var posIdx:uint = 0;
-		private var startPos:Vector3D = new Vector3D(4370,0,4370);
+		private var startPos:Vector3D = new Vector3D(5120,0,5120);//(4370,0,4370)
 		private function creatteUI():void
 		{
 			tex1 = new TextField();
