@@ -49,16 +49,16 @@ package
 			Enviroment.ConfigRootPath = "E:/project/flash/game/MT/MTClient/MTArt/assets/config/";
 			Enviroment.ResourceRootPath = "E:/project/flash/game/MT/MTClient/MTArt/assets/data/";
 			
-//			this._gameContainer = new Sprite();
-//			this._gameContainer.graphics.beginFill(0,0);
-//			this._gameContainer.graphics.drawRect(0,0,stage.stageWidth,stage.stageHeight);
-//			this._gameContainer.graphics.endFill();
-//			this.addChild(this._gameContainer);
+			this._gameContainer = new Sprite();
+			this._gameContainer.graphics.beginFill(0,0);
+			this._gameContainer.graphics.drawRect(0,0,stage.stageWidth,stage.stageHeight);
+			this._gameContainer.graphics.endFill();
+			this.addChild(this._gameContainer);
 			
-//			this._gameContainer.mouseEnabled = false;
-//			this._gameContainer.mouseChildren = false;
+			this._gameContainer.mouseEnabled = false;
+			this._gameContainer.mouseChildren = false;
 			
-			_game = new Game(this,onGameStart);
+			_game = new Game(this._gameContainer,onGameStart);
 			
 			this.stage.addEventListener(Event.RESIZE,onResize);
 			
@@ -77,8 +77,8 @@ package
 		
 		private function onResize(evt:Event):void
 		{
-//			this._gameContainer.width = stage.stageWidth;
-//			this._gameContainer.height = stage.stageHeight;
+			this._gameContainer.width = stage.stageWidth;
+			this._gameContainer.height = stage.stageHeight;
 			
 			if(_game)
 			{
