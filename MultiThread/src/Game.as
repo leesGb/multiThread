@@ -33,7 +33,7 @@ package
 			
 			if(_gameStart!=null)
 			{
-				setTimeout(_gameStart,500);
+				setTimeout(_gameStart,1000);
 			}
 		}
 		

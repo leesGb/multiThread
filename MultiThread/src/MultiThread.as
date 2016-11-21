@@ -6,8 +6,15 @@ package
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Vector3D;
+	import flash.system.MessageChannel;
+	import flash.system.Worker;
+	import flash.system.WorkerDomain;
+	import flash.system.WorkerState;
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
+	import flash.utils.getTimer;
 	
 	import deltax.appframe.SceneGrid;
 	import deltax.common.resource.Enviroment;
@@ -31,6 +38,13 @@ package
 		
 		private var _renderScene:RenderScene;
 		
+		private var _caleThread:Worker;
+		
+		private var _msgToCaleThread:MessageChannel;
+		private var _msgToMainThread:MessageChannel;
+		
+		private var _testData:ByteArray;
+		
 		public function MultiThread()
 		{
 			if(stage)
@@ -46,8 +60,28 @@ package
 		{
 			this.removeEventListener(Event.ADDED_TO_STAGE,init);
 			
-			Enviroment.ConfigRootPath = "E:/project/flash/game/MT/MTClient/MTArt/assets/config/";
-			Enviroment.ResourceRootPath = "E:/project/flash/game/MT/MTClient/MTArt/assets/data/";
+			this._testData = new ByteArray();
+			this._testData.endian = Endian.LITTLE_ENDIAN;
+			this._testData.shareable = true;
+			this._testData.length = 100;
+			
+			
+			this._caleThread = WorkerDomain.current.createWorker(Workers.CaleThreadSwf);
+			this._caleThread.addEventListener(Event.WORKER_STATE,onWorkerStateHandler);
+			
+			this._msgToCaleThread = Worker.current.createMessageChannel(this._caleThread);
+			this._msgToMainThread = this._caleThread.createMessageChannel(Worker.current);
+			
+			this._caleThread.setSharedProperty("toMainThread",this._msgToMainThread);
+			this._caleThread.setSharedProperty("toCaleThread",this._msgToCaleThread);
+			this._caleThread.setSharedProperty("shareData",this._testData);
+			
+			this._msgToMainThread.addEventListener(Event.CHANNEL_MESSAGE,reciveMsgHandler);
+			
+			this._caleThread.start();
+			
+			Enviroment.ConfigRootPath = "E:/project/flash/MTArt/assets/config/";
+			Enviroment.ResourceRootPath = "E:/project/flash/MTArt/assets/data/";
 			
 			this._gameContainer = new Sprite();
 			this._gameContainer.graphics.beginFill(0,0);
@@ -65,6 +99,35 @@ package
 			creatteUI();
 			
 			showFps();
+		}
+		
+		private function onWorkerStateHandler(evt:Event):void
+		{
+			if(this._caleThread.state == WorkerState.RUNNING)
+			{
+//				sendMsgToCaleThread("test","caleThread================"+getTimer());
+			}
+		}
+		
+		public function sendMsgToCaleThread(cmd:String,value:*):void
+		{
+			var arr:Array=[cmd,value];
+			this._msgToCaleThread.send(arr);
+		}
+		
+		private function reciveMsgHandler(evt:Event):void
+		{
+			var msgArr:Array = this._msgToMainThread.receive();
+			var cmd:String = msgArr[0];
+			switch(cmd)
+			{
+				case "test":
+					trace(msgArr[1]);
+					break;
+				case "MSG_INTERVAL":
+					trace("MSG_INTERVAL==",msgArr[1]);
+					break;
+			}
 		}
 		
 		private function showFps():void
@@ -154,6 +217,31 @@ package
 			this.addChild(c1);
 			c1.x = 480;
 			c1.addEventListener(MouseEvent.CLICK,onClickHandler);
+			
+			var c12:Sprite = new Sprite();
+			c12.buttonMode = true;
+			c12.graphics.beginFill(0xff0000);
+			c12.graphics.drawRect(0,0,100,30);
+			c12.graphics.endFill();
+			this.addChild(c12);
+			c12.x = 600;
+			c12.addEventListener(MouseEvent.CLICK,onClickHandler2);
+		}
+		
+		private function onClickHandler2(evt:MouseEvent):void
+		{
+			var t:uint = getTimer();
+			sendMsgToCaleThread("test",t);
+//			_testData.position = 0;
+//			_testData.writeByte(1);
+//			_testData.length = 99;
+			var i:uint = 0;
+			while(i<22000)
+			{
+//				trace(i);
+				i++;
+			}
+			trace("oo=============",getTimer()-t);
 		}
 		
 		private function onClickHandler(evt:MouseEvent):void
