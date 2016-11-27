@@ -22,6 +22,8 @@ package
 	import deltax.graphic.scenegraph.object.ObjectContainer3D;
 	import deltax.graphic.scenegraph.object.RenderObject;
 	import deltax.graphic.scenegraph.object.RenderScene;
+	import deltax.worker.WorkerManager;
+	import deltax.worker.WorkerName;
 	
 	
 	/**
@@ -38,13 +40,6 @@ package
 		
 		private var _renderScene:RenderScene;
 		
-		private var _caleThread:Worker;
-		
-		private var _msgToCaleThread:MessageChannel;
-		private var _msgToMainThread:MessageChannel;
-		
-		private var _testData:ByteArray;
-		
 		public function MultiThread()
 		{
 			if(stage)
@@ -60,25 +55,7 @@ package
 		{
 			this.removeEventListener(Event.ADDED_TO_STAGE,init);
 			
-			this._testData = new ByteArray();
-			this._testData.endian = Endian.LITTLE_ENDIAN;
-			this._testData.shareable = true;
-			this._testData.length = 100;
-			
-			
-			this._caleThread = WorkerDomain.current.createWorker(Workers.CaleThreadSwf);
-			this._caleThread.addEventListener(Event.WORKER_STATE,onWorkerStateHandler);
-			
-			this._msgToCaleThread = Worker.current.createMessageChannel(this._caleThread);
-			this._msgToMainThread = this._caleThread.createMessageChannel(Worker.current);
-			
-			this._caleThread.setSharedProperty("toMainThread",this._msgToMainThread);
-			this._caleThread.setSharedProperty("toCaleThread",this._msgToCaleThread);
-			this._caleThread.setSharedProperty("shareData",this._testData);
-			
-			this._msgToMainThread.addEventListener(Event.CHANNEL_MESSAGE,reciveMsgHandler);
-			
-			this._caleThread.start();
+			WorkerManager.instance.initWorker(WorkerName.CALE_THREAD);
 			
 			Enviroment.ConfigRootPath = "E:/project/flash/MTArt/assets/config/";
 			Enviroment.ResourceRootPath = "E:/project/flash/MTArt/assets/data/";
@@ -99,35 +76,6 @@ package
 			creatteUI();
 			
 			showFps();
-		}
-		
-		private function onWorkerStateHandler(evt:Event):void
-		{
-			if(this._caleThread.state == WorkerState.RUNNING)
-			{
-//				sendMsgToCaleThread("test","caleThread================"+getTimer());
-			}
-		}
-		
-		public function sendMsgToCaleThread(cmd:String,value:*):void
-		{
-			var arr:Array=[cmd,value];
-			this._msgToCaleThread.send(arr);
-		}
-		
-		private function reciveMsgHandler(evt:Event):void
-		{
-			var msgArr:Array = this._msgToMainThread.receive();
-			var cmd:String = msgArr[0];
-			switch(cmd)
-			{
-				case "test":
-					trace(msgArr[1]);
-					break;
-				case "MSG_INTERVAL":
-					trace("MSG_INTERVAL==",msgArr[1]);
-					break;
-			}
 		}
 		
 		private function showFps():void
@@ -230,18 +178,18 @@ package
 		
 		private function onClickHandler2(evt:MouseEvent):void
 		{
-			var t:uint = getTimer();
-			sendMsgToCaleThread("test",t);
-//			_testData.position = 0;
-//			_testData.writeByte(1);
-//			_testData.length = 99;
-			var i:uint = 0;
-			while(i<22000)
-			{
-//				trace(i);
-				i++;
-			}
-			trace("oo=============",getTimer()-t);
+//			var t:uint = getTimer();
+//			sendMsgToCaleThread("test",t);
+////			_testData.position = 0;
+////			_testData.writeByte(1);
+////			_testData.length = 99;
+//			var i:uint = 0;
+//			while(i<22000)
+//			{
+////				trace(i);
+//				i++;
+//			}
+//			trace("oo=============",getTimer()-t);
 		}
 		
 		private function onClickHandler(evt:MouseEvent):void
