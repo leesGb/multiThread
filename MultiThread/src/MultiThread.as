@@ -55,7 +55,7 @@ package
 		{
 			this.removeEventListener(Event.ADDED_TO_STAGE,init);
 			
-			WorkerManager.instance.initWorker(WorkerName.CALE_THREAD);
+//			WorkerManager.instance.initWorker(WorkerName.CALE_THREAD);
 			
 			Enviroment.ConfigRootPath = "E:/project/flash/MTArt/assets/config/";
 			Enviroment.ResourceRootPath = "E:/project/flash/MTArt/assets/data/";
