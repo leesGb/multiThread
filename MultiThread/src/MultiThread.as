@@ -6,18 +6,15 @@ package
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Vector3D;
-	import flash.system.MessageChannel;
-	import flash.system.Worker;
-	import flash.system.WorkerDomain;
-	import flash.system.WorkerState;
+	import flash.net.URLLoaderDataFormat;
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
 	import flash.utils.getTimer;
 	
 	import deltax.appframe.SceneGrid;
 	import deltax.common.resource.Enviroment;
+	import deltax.common.respackage.common.LoaderCommon;
+	import deltax.common.respackage.loader.LoaderManager;
 	import deltax.graphic.manager.IResource;
 	import deltax.graphic.scenegraph.object.ObjectContainer3D;
 	import deltax.graphic.scenegraph.object.RenderObject;
@@ -55,10 +52,13 @@ package
 		{
 			this.removeEventListener(Event.ADDED_TO_STAGE,init);
 			
-//			WorkerManager.instance.initWorker(WorkerName.CALE_THREAD);
+			var cdn:String = this.loaderInfo.parameters.cdnUrl;
 			
-			Enviroment.ConfigRootPath = "E:/project/flash/MTArt/assets/config/";
-			Enviroment.ResourceRootPath = "E:/project/flash/MTArt/assets/data/";
+			WorkerManager.instance.mainThread = this;
+			WorkerManager.instance.initWorker(WorkerName.CALE_THREAD);
+			
+			Enviroment.ConfigRootPath = cdn+"assets/config/";
+			Enviroment.ResourceRootPath = cdn+"assets/data/";
 			
 			this._gameContainer = new Sprite();
 			this._gameContainer.graphics.beginFill(0,0);
@@ -117,7 +117,7 @@ package
 		private var tex1:TextField;
 		private var tex2:TextField;
 		private var tex3:TextField;
-		private var tex4:TextField;
+		public var tex4:TextField;
 		private var posIdx:uint = 0;
 		private var startPos:Vector3D = new Vector3D(5120,0,5120);//(4370,0,4370)
 		private function creatteUI():void
@@ -178,6 +178,9 @@ package
 		
 		private function onClickHandler2(evt:MouseEvent):void
 		{
+			WorkerManager.instance.sendMsgToCaleThread("test",getTimer());
+			
+			LoaderManager.getInstance().load(Enviroment.ConfigRootPath+"tableData.pak",{onComplete:onFinished},LoaderCommon.LOADER_URL, false, {dataFormat:URLLoaderDataFormat.BINARY});
 //			var t:uint = getTimer();
 //			sendMsgToCaleThread("test",t);
 ////			_testData.position = 0;
@@ -190,6 +193,11 @@ package
 //				i++;
 //			}
 //			trace("oo=============",getTimer()-t);
+		}
+		
+		private function onFinished(param:Object):void
+		{
+			trace("main load success======================");
 		}
 		
 		private function onClickHandler(evt:MouseEvent):void
